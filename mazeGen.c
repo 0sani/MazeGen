@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define SIZE_X (20 * 2 + 1)
+#define SIZE_X (30 * 2 + 1)
 #define SIZE_Y (20 * 2 + 1)
 
 // right, left, down, up    one row/col
 const int translations[] = {1, -1, SIZE_X, -SIZE_X};
 
 void display_maze(int maze[SIZE_Y][SIZE_X]);
-
+void create_maze(int maze[SIZE_Y][SIZE_X], int algorithm);
 
 void dfs_recursive(int maze[SIZE_Y][SIZE_X], int currentSquare);
 
@@ -22,19 +22,9 @@ int main(int argc, char *argv[]) {
 
     int maze[SIZE_Y][SIZE_X];
 
-    // Fills the maze with walls
-    for (int i = 0; i < SIZE_Y; i++) {
-        for (int j = 0; j < SIZE_X; j++) {
-            maze[i][j] = 1;
-        }        
-    }
-
-    // Gets random square on left side of maze
-    int start = (rand() % (SIZE_Y / 2))*2 + 1;
-    start *= SIZE_X; start++;
-
     srand(time(NULL));
-    dfs_recursive(maze, start);
+
+	create_maze(maze, 1);	
 
     display_maze(maze);
 
@@ -49,16 +39,16 @@ void dfs_recursive(int maze[SIZE_Y][SIZE_X], int currentSquare) {
 
     while (check_neighbors(maze, currentSquare)) {
 
-        
         int dir = rand() % 4;
 
         int trans = translations[dir];
-        int new = currentSquare+trans*2;
-        if (!check_square(maze, currentSquare, trans*2)) continue;
-
-        fill_square(maze, new-trans);
-        fill_square(maze, new);
-
+		//puts("in while loop");
+		//printf("Current: %d Current y: %d Current x: %d Translation: %d\n", currentSquare,  currentSquare / SIZE_Y,currentSquare % SIZE_X, trans); 
+		//printf("%d %d\n", currentSquare+trans,currentSquare+trans*2);
+		if (!check_square(maze, currentSquare, trans*2)) continue;
+        
+		fill_square(maze, currentSquare+trans);
+	   	fill_square(maze, currentSquare+trans*2);
 
         dfs_recursive(maze, currentSquare+trans*2);
     }
@@ -66,7 +56,7 @@ void dfs_recursive(int maze[SIZE_Y][SIZE_X], int currentSquare) {
 
 // Returns 0 if the current square has a unvisited neighbor
 int check_neighbors(int maze[SIZE_Y][SIZE_X], int currentSquare) {
-    for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
         int translation = translations[i]*2;
         if (check_square(maze, currentSquare, translation)) return 1;
     }
@@ -87,17 +77,17 @@ int check_square(int maze[SIZE_Y][SIZE_X], int currentSquare, int translation) {
     // In other words, I apologize to whoever must read this code
     return ((currentSquare % SIZE_X + translation % SIZE_X) > -1 && 
             (currentSquare % SIZE_X + translation % SIZE_X) < SIZE_X &&
-            (currentSquare / SIZE_Y + translation / SIZE_Y) > -1 &&
-            (currentSquare / SIZE_Y + translation / SIZE_Y) < SIZE_Y &&
+            (currentSquare / SIZE_X + translation / SIZE_X) > -1 &&
+            (currentSquare / SIZE_X + translation / SIZE_X) < SIZE_Y &&
             get_square(maze, currentSquare+translation));
 }
 
 void fill_square(int maze[SIZE_Y][SIZE_X], int currentSquare) {
-    maze[currentSquare / SIZE_X][currentSquare % SIZE_Y] = 0;
+    maze[currentSquare / SIZE_X][currentSquare % SIZE_X] = 0;
 }
 
 int get_square(int maze[SIZE_Y][SIZE_X], int currentSquare) {
-    return maze[currentSquare / SIZE_X][currentSquare % SIZE_Y];
+    return maze[currentSquare / SIZE_X][currentSquare % SIZE_X];
 }
 
 void display_maze(int maze[SIZE_Y][SIZE_X]) {
@@ -116,3 +106,29 @@ void display_maze(int maze[SIZE_Y][SIZE_X]) {
 		printf("\n");
 	}
 }
+
+// takes in 2d array and creates maze based on algorithm
+void create_maze(int maze[SIZE_Y][SIZE_X], int algorithm) {
+
+    // Fills the maze with walls
+    for (int i = 0; i < SIZE_Y; i++) {
+        for (int j = 0; j < SIZE_X; j++) {
+            maze[i][j] = 1;
+        }        
+    }
+
+    // Gets random square on left side of maze
+    int start = (rand() % (SIZE_Y / 2))*2 + 1;
+    start *= SIZE_X; start++;
+
+
+	switch (algorithm)
+	{
+		case 1:
+			dfs_recursive(maze,start);
+			break;
+		default:
+			printf("Not a valid choice\n");
+	}
+}
+
